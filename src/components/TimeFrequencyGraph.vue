@@ -7,43 +7,24 @@
 
 <script setup lang="ts">
 import * as d3 from "d3";
-import { onMounted } from "vue";
+import { onMounted, ref, watch } from "vue";
 import data from "../data"
 
 //全局变量
-const width = 1200;
+const $emit = defineEmits(['timeSelect'])
+const width = 1400;
 const p = 16
 const height = p*data.times.length;
 const freqSlice = 100;
 const margin = {
     top: 30,
     bottom: 0,
-    left: 30,
+    left: 60,
     right: 0,
 };
 const color = d3.scaleSequentialSqrt([0, d3.max(data.values, d => d3.max(d))], d3.interpolatePuRd)
-// const datas = {
-//     times: [],
-//     frequencys: [],
-//     values: []
-// }
-// for(let i=0; i<100; i++){
-//     datas.times.push(new Date().getTime()+i*1000)
-// }
-// for(let i=0; i<=freqSlice; i++){
-//     datas.frequencys.push(11950+i*(12000-11950)/freqSlice)
-// }
-// for(let i=0; i<100; i++){
-//     let tmp = []
-//     for(let j=0; j<=freqSlice; j++){
-//         tmp.push(Math.random()*50)
-//     }
-//     datas.values.push(tmp)
-// }
-// console.log(JSON.stringify(datas));
-
-
 onMounted(() => {
+    
     const svg = d3
         .select("#time-frequency-view")
         .append("svg")
@@ -70,32 +51,53 @@ onMounted(() => {
         .attr("class", "x-axis")
         .attr("transform", `translate(0, ${margin.top})`)
         .call(d3.axisTop(x));
-    console.log(x(11950));
     
     svg
         .append("g")
+        .attr("class",'matrix')
+        .on("mousemove",(e, i)=>{
+            d3.select(".scan").remove()
+            d3.select(`.matrix`).append("rect").attr("class", "scan").attr("x", `${margin.left}`).attr("y", d3.pointer(e, this)[1] + 1).attr("width", width).attr("height", 2)
+        })
         .selectAll("g")
-        .data(data.values)
+        .data(data.times)
         .join("g")
         .attr("transform", (d, i) => {
             return `translate(0, ${y(data.times[i])})`;
         })
+        .attr("class", (d, i)=>{return `time${data.times[i]}`})
+        .on("click", (e, i)=>{
+            $emit("timeSelect", i)
+        })
         .selectAll("rect")
-        .data((d) => d)
+        .data((d, i) => data.values[i].map((e, i)=>{return {time: data.times[i], freq: data.frequencys[i], value: e}}))
         .join("rect")
-        .attr("x", (d, i) => x(data.frequencys[i])-1200/freqSlice/2)
-        .attr(
-            "width",
-            (d, i) => 1200/freqSlice
-        )
+        .attr("x", (d, i) => {
+            return x(d.freq)-width/freqSlice/2
+        })
+        .attr("width", width/freqSlice)
         .attr("height", y.bandwidth() - 1)
-        .attr("fill", d => isNaN(d) ? "#eee" : d === 0 ? "#fff" : color(d))
+        .attr("fill", d => isNaN(d.value) ? "#eee" : d.value === 0 ? "#fff" : color(d.value))
+        .on("mousemove",(e, d)=>{
+            // console.log(d);
+        })
+        .on("mouseoute",(e, d)=>{
+
+        })
 });
 </script>
 
 <style scoped lang="less">
-#time-frequency-view{
+#time-frequency-container{
+    display: flex;
+    justify-content: center;
+    #time-frequency-view{
     max-height: 400px;
     overflow-y: scroll;
+    #time-frequency-view{
+    }
 }
+
+}
+
 </style>
