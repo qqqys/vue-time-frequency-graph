@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import * as d3 from "d3";
-import { onMounted, ref, watch } from "vue";
+import { onMounted,} from "vue";
 import data from "../data"
 
 //全局变量
@@ -79,7 +79,6 @@ onMounted(() => {
         .attr("height", y.bandwidth() - 1)
         .attr("fill", d => isNaN(d.value) ? "#eee" : d.value === 0 ? "#fff" : color(d.value))
         .on("mousemove",(e, d)=>{
-            // console.log(d);
         })
         .on("mouseoute",(e, d)=>{
 
