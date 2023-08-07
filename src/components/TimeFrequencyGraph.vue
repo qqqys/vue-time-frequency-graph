@@ -8,10 +8,28 @@
 <script setup lang="ts">
 import * as d3 from "d3";
 import { onMounted,} from "vue";
-import data from "../data"
-
 //全局变量
+const props = defineProps({
+    data:{
+        type: Object,
+        default: null
+    },
+    width:{
+        type: Number,
+        default: 1400
+    },
+    height:{
+        type: Number,
+        default: 400
+    },
+    marginTop:{
+        type: Number,
+        default: 30
+    }
+})
 const $emit = defineEmits(['timeSelect'])
+
+
 const width = 1400;
 const p = 16
 const height = p*data.times.length;
@@ -23,6 +41,11 @@ const margin = {
     right: 0,
 };
 const color = d3.scaleSequentialSqrt([0, d3.max(data.values, d => d3.max(d))], d3.interpolatePuRd)
+
+const draw = ()=>{
+
+}
+
 onMounted(() => {
     
     const svg = d3
@@ -36,7 +59,7 @@ onMounted(() => {
         .scaleBand()
         .domain(data.times)
         .rangeRound([margin.top, margin.top + height]);
-    const slice = (12000-11950)/freqSlice/2
+    const slice = (d3.max(data.frequencys)-d3.min(data.frequencys))/freqSlice/2
     const x = d3
         .scaleLinear()
         .domain([d3.min(data.frequencys)-slice,d3.max(data.frequencys)+slice])
